@@ -30,9 +30,10 @@ app.get("/app/", (req, res, next) => {
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
 app.post("/app/new", (req, res) => {
 	var encrypted_pass = md5(req.body.pass);
+	var user = req.body.user;
 	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)");
-	const info = stmt.run(req.body.user, encrypted_pass);
-	res.status(200).json(info.lastInsertRowid);
+	const info = stmt.run(user, encrypted_pass);
+	res.status(200).json(stmt);
 });
 
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
@@ -49,6 +50,7 @@ app.get("/app/user/:id", (req, res) => {
 
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
+	console.log(req.body.pass);
 	var encrypted_pass = md5(req.body.pass);	
 	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?");
 	const info = stmt.run(req.body.user, encrypted_pass, req.params.id);
@@ -57,9 +59,8 @@ app.patch("/app/update/user/:id", (req, res) => {
 
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {
-	var encrypted_pass = md5(req.body.pass);	
 	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?");
-	const info = stmt.run(req.body.user, encrypted_pass, req.params.id);
+	const info = stmt.run(req.params.id);
 	res.status(200).json(info.changes);
 });
 
