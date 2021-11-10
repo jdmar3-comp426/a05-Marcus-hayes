@@ -20,24 +20,24 @@ app.listen(HTTP_PORT, () => {
     console.log("Server running on port %PORT%".replace("%PORT%",HTTP_PORT))
 });
 // READ (HTTP method GET) at root endpoint /app/
-app.get("/app/", (req, res, next) => {
-    res.json({"message":"Your API is working!"});
+app.get("/app/", (req, res) => {
+    res.json({"message":"Your API works!"});
 	res.status(200);
 });
 
 // Define other CRUD API endpoints using express.js and better-sqlite3
 
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
-app.post("/app/new", (req, res) => {
+app.post("/app/new/", (req, res) => {
 	var encrypted_pass = md5(req.body.pass);
 	var user = req.body.user;
-	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)");
-	const info = stmt.run(user, encrypted_pass);
-	res.status(200).json(stmt);
+	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)").run([user, encrypted_pass])
+	res.json({"message": `1 record created : ID ${req.params.id} (201)`})
+	res.status(201);
 });
 
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
-app.get("/app/users", (req, res) => {	
+app.get("/app/users/", (req, res) => {	
 	const stmt = db.prepare("SELECT * FROM userinfo").all();
 	res.status(200).json(stmt);
 });
@@ -50,18 +50,17 @@ app.get("/app/user/:id", (req, res) => {
 
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
-	console.log(req.body.pass);
 	var encrypted_pass = md5(req.body.pass);	
-	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?");
-	const info = stmt.run(req.body.user, encrypted_pass, req.params.id);
-	res.status(200).json(info.changes);
+	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?").run([req.body.user, encrypted_pass, req.params.id]);
+	res.json({"message": `1 record updated: ID ${req.params.id} (200)`})
+	res.status(200);
 });
 
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {
-	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?");
-	const info = stmt.run(req.params.id);
-	res.status(200).json(info.changes);
+	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?").run([req.params.id]);
+	res.json({"message": `1 record deleted: ID ${req.params.id} (200)`})
+	res.status(200);
 });
 
 // Default response for any other request
