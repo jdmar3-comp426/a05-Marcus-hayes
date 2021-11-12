@@ -31,8 +31,10 @@ app.get("/app/", (req, res) => {
 app.post("/app/new/", (req, res) => {
 	var encrypted_pass = md5(req.body.pass);
 	var user = req.body.user;
-	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)").run([user, encrypted_pass])
-	res.json({"message": `1 record created : ID ${req.params.id} (201)`})
+	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)");
+	const info = stmt.run([user, encrypted_pass]);
+	let id = info.lastInsertRowid;
+	res.json({"message": `1 record created : ID ${id} (201)`});
 	res.status(201);
 });
 
