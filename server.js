@@ -33,7 +33,7 @@ app.post("/app/new/", (req, res) => {
 	var user = req.body.user;
 	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?,?)");
 	const info = stmt.run([user, encrypted_pass]);
-	res.json({"message": `1 record created : ID ${info.lastInsertRowid} (201)`});
+	res.json({"message": `1 record created: ID ${info.lastInsertRowid} (201)`});
 	res.status(201);
 });
 
